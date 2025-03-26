@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>商品驗證</title>
+  <style>
+    body {
+      font-family: "微軟正黑體", sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    .status {
+      font-size: 24px;
+      padding: 20px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .valid {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .invalid {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h1>商品驗證結果</h1>
+  <div class="status" id="result">驗證中...</div>
+
+  <script>
+    // 模擬商品資料庫：有效的驗證碼
+    const validCodes = ["ABC123", "DEF456", "XYZ789"];
+
+    // 取得網址中的參數 ?id=XXXXX
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("id");
+
+    const resultDiv = document.getElementById("result");
+
+    if (!code) {
+      resultDiv.innerText = "❌ 未提供驗證碼";
+      resultDiv.className = "status invalid";
+    } else if (validCodes.includes(code)) {
+      resultDiv.innerText = "✅ 此商品為正品（驗證碼：" + code + "）";
+      resultDiv.className = "status valid";
+    } else {
+      resultDiv.innerText = "❌ 此商品可能為偽品或驗證碼錯誤（" + code + "）";
+      resultDiv.className = "status invalid";
+    }
+  </script>
+</body>
+</html>
