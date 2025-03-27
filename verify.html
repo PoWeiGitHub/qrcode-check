@@ -29,20 +29,20 @@
   <h2>防偽驗證</h2>
   <div>
     <p>商品序號：<strong id="serialNumber">載入中...</strong></p>
-    <p>請輸入防偽驗證碼（24位英數字）：</p>
-    <input type="text" id="authCode" maxlength="24" />
+    <p>請輸入防偽驗證碼（6位英數字）：</p>
+    <input type="text" id="authCode" maxlength="6" />
     <br><br>
     <button onclick="verify()">送出驗證</button>
   </div>
   <div class="result" id="result"></div>
 
   <script>
-    // 模擬資料庫：序號對應驗證碼（24碼），最多驗證 5 次
+    // 模擬資料庫：序號對應驗證碼（6碼），最多驗證 5 次
     const verificationDB = {
-      "00000988": { code: "ABC123DEF456GHI789JKL012", checked: 0 },
-      "00008888": { code: "ZXY987WVU654TSR321QPO000", checked: 0 },
-      "00008886": { code: "ZXY987WVU654TSR321QPO262", checked: 0 },
-      "00008887": { code: "ZXY987WVU654TSR321QPO989", checked: 0 }
+      "00000988": { code: "ABC123", checked: 0 },
+      "00008888": { code: "D56912", checked: 0 },
+      "00008886": { code: "A84512", checked: 0 },
+      "00008887": { code: "G84541", checked: 0 }
     };
 
     // 從網址抓序號 ?serial=xxxx
