@@ -2,52 +2,58 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>商品驗證</title>
+  <title>商品防偽驗證</title>
   <style>
-    body {
-      font-family: "微軟正黑體", sans-serif;
-      text-align: center;
-      margin-top: 100px;
-    }
-    .status {
-      font-size: 24px;
-      padding: 20px;
-      border-radius: 12px;
-      display: inline-block;
-    }
-    .valid {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .invalid {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    input { font-size: 18px; padding: 5px; }
+    .result { margin-top: 20px; font-size: 20px; }
   </style>
 </head>
 <body>
-  <h1>商品驗證結果</h1>
-  <div class="status" id="result">驗證中...</div>
+  <h2>防偽驗證</h2>
+  <div>
+    <p>商品序號：<strong id="serialNumber">載入中...</strong></p>
+    <p>請輸入防偽驗證碼（6位英數字）：</p>
+    <input type="text" id="authCode" maxlength="6" />
+    <button onclick="verify()">送出驗證</button>
+  </div>
+  <div class="result" id="result"></div>
 
   <script>
-    // 模擬商品資料庫：有效的驗證碼
-    const validCodes = ["201001202504260776002356", "201001202504260776002998", "20100120250426077600665"];
+    // 模擬資料庫序號與驗證碼對照表
+    const verificationDB = {
+      "00000980": { code: "20100120250426077600665", checked: 0 },
+      "00008881": { code: "20100120250426077600885", checked: 0 },
+      "00000982": { code: "20100120250426077600996", checked: 0 },
+    };
 
-    // 取得網址中的參數 ?id=XXXXX
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("id");
+    // 讀取網址序號
+    const urlParams = new URLSearchParams(window.location.search);
+    const serial = urlParams.get("serial");
+    document.getElementById("serialNumber").innerText = serial ?? "未提供";
 
-    const resultDiv = document.getElementById("result");
+    function verify() {
+      const inputCode = document.getElementById("authCode").value.toUpperCase();
+      const resultDiv = document.getElementById("result");
 
-    if (!code) {
-      resultDiv.innerText = "❌ 未提供驗證碼";
-      resultDiv.className = "status invalid";
-    } else if (validCodes.includes(code)) {
-      resultDiv.innerText = "✅ 此商品為正品（驗證碼：" + code + "）";
-      resultDiv.className = "status valid";
-    } else {
-      resultDiv.innerText = "❌ 此商品可能為偽品或驗證碼錯誤（" + code + "）";
-      resultDiv.className = "status invalid";
+      if (!serial || !verificationDB[serial]) {
+        resultDiv.innerText = "❌ 查無此序號";
+        return;
+      }
+
+      const record = verificationDB[serial];
+
+      if (record.checked >= 5) {
+        resultDiv.innerText = "❌ 驗證次數已達上限，條碼失效";
+        return;
+      }
+
+      if (inputCode === record.code) {
+        record.checked++;
+        resultDiv.innerHTML = `✅ 商品驗證成功！<br>剩餘驗證次數：${5 - record.checked} 次`;
+      } else {
+        resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
+      }
     }
   </script>
 </body>
