@@ -37,7 +37,7 @@
   <div class="result" id="result"></div>
 
   <script>
-    // 模擬資料庫：序號對應驗證碼（6碼），最多驗證 5 次
+    // 模擬資料庫：序號對應驗證碼（6碼），最多驗證 10 次
     const verificationDB = {
       "00000988": { code: "ABC123", checked: 0 },
       "00008888": { code: "D56912", checked: 0 },
@@ -61,14 +61,14 @@
 
       const record = verificationDB[serial];
 
-      if (record.checked >= 5) {
+      if (record.checked >= 10) {
         resultDiv.innerText = "❌ 驗證次數已達上限，條碼失效";
         return;
       }
 
       if (inputCode === record.code) {
         record.checked++;
-        resultDiv.innerHTML = `✅ 商品驗證成功！<br>剩餘驗證次數：${5 - record.checked} 次`;
+        resultDiv.innerHTML = `✅ 商品驗證成功！<br>剩餘驗證次數：${10 - record.checked} 次`;
       } else {
         resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
       }
