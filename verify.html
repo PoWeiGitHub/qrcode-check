@@ -5,7 +5,7 @@
   <title>商品防偽驗證</title>
   <style>
     body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-    input { font-size: 18px; padding: 5px; }
+    input { font-size: 18px; padding: 5px; width: 320px; }
     .result { margin-top: 20px; font-size: 20px; }
   </style>
 </head>
@@ -15,25 +15,27 @@
     <p>商品序號：<strong id="serialNumber">載入中...</strong></p>
     <p>請輸入防偽驗證碼（24位英數字）：</p>
     <input type="text" id="authCode" maxlength="24" />
+    <br><br>
     <button onclick="verify()">送出驗證</button>
   </div>
   <div class="result" id="result"></div>
 
   <script>
-    // 模擬資料庫序號與驗證碼對照表
+    // 模擬資料庫：序號對應驗證碼（24碼），最多驗證 5 次
     const verificationDB = {
-      "00000980": { code: "20100120250426077600665", checked: 0 },
-      "00008881": { code: "20100120250426077600885", checked: 0 },
-      "00000982": { code: "20100120250426077600996", checked: 0 },
+      "00000988": { code: "ABC123DEF456GHI789JKL012", checked: 0 },
+      "00008888": { code: "ZXY987WVU654TSR321QPO000", checked: 0 },
+      "00008886": { code: "ZXY987WVU654TSR321QPO262", checked: 0 },
+      "00008887": { code: "ZXY987WVU654TSR321QPO989", checked: 0 }
     };
 
-    // 讀取網址序號
+    // 從網址抓序號 ?serial=xxxx
     const urlParams = new URLSearchParams(window.location.search);
     const serial = urlParams.get("serial");
     document.getElementById("serialNumber").innerText = serial ?? "未提供";
 
     function verify() {
-      const inputCode = document.getElementById("authCode").value.toUpperCase();
+      const inputCode = document.getElementById("authCode").value.toUpperCase().trim();
       const resultDiv = document.getElementById("result");
 
       if (!serial || !verificationDB[serial]) {
@@ -54,7 +56,4 @@
       } else {
         resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
       }
-    }
-  </script>
-</body>
-</html>
+}
