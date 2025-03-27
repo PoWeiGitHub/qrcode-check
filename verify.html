@@ -4,9 +4,25 @@
   <meta charset="UTF-8">
   <title>商品防偽驗證</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-    input { font-size: 18px; padding: 5px; width: 320px; }
-    .result { margin-top: 20px; font-size: 20px; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+    input {
+      font-size: 18px;
+      padding: 5px;
+      width: 320px;
+    }
+    button {
+      font-size: 18px;
+      padding: 8px 16px;
+      margin-top: 10px;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+    }
   </style>
 </head>
 <body>
@@ -56,4 +72,7 @@
       } else {
         resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
       }
-}
+    }
+  </script>
+</body>
+</html>
