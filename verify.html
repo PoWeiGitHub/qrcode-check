@@ -29,6 +29,7 @@
   <h2>防偽驗證</h2>
   <div>
     <p>商品序號：<strong id="serialNumber">載入中...</strong></p>
+    <strong style="color: red;">請刮開黑色區塊並檢視驗證碼</strong>
     <p>請輸入防偽驗證碼（6位英數字）：</p>
     <input type="text" id="authCode" maxlength="6" />
     <br><br>
@@ -37,7 +38,7 @@
   <div class="result" id="result"></div>
 
   <script>
-    // 模擬資料庫：序號對應驗證碼（6碼），最多驗證 10 次
+    // 模擬資料庫：序號對應驗證碼（6碼），最多驗證 1 次
     const verificationDB = {
       "00000988": { code: "ABC123", checked: 0 },
       "00008888": { code: "D56912", checked: 0 },
@@ -61,14 +62,14 @@
 
       const record = verificationDB[serial];
 
-      if (record.checked >= 10) {
+      if (record.checked >= 1) {
         resultDiv.innerText = "❌ 驗證次數已達上限，條碼失效";
         return;
       }
 
       if (inputCode === record.code) {
         record.checked++;
-        resultDiv.innerHTML = `✅ 商品驗證成功！<br>剩餘驗證次數：${10 - record.checked} 次`;
+        resultDiv.innerHTML = `✅ 商品驗證成功！<br>剩餘驗證次數：${1 - record.checked} 次`;
       } else {
         resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
       }
