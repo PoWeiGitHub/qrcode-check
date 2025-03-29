@@ -18,6 +18,7 @@
       font-size: 18px;
       padding: 8px 16px;
       margin-top: 10px;
+      margin-right: 10px;
     }
     .result {
       margin-top: 20px;
@@ -34,11 +35,12 @@
     <input type="text" id="authCode" maxlength="6" />
     <br><br>
     <button onclick="verify()">送出驗證</button>
+    <button onclick="resetVerification()">重製驗證</button>
   </div>
   <div class="result" id="result"></div>
 
   <script>
-    // 模擬資料庫：序號對應驗證碼（6碼），最多驗證 1 次
+    // 模擬資料庫：每筆資料為一個序號對應的驗證碼（6碼），只允許成功驗證一次
     const verificationDB = {
       "00000988": { code: "ABC123", checked: 0 },
       "00008888": { code: "D56912", checked: 0 },
@@ -46,7 +48,7 @@
       "00008887": { code: "G84541", checked: 0 }
     };
 
-    // 從網址抓序號 ?serial=xxxx
+    // 從網址抓取查詢參數 ?serial=xxxx
     const urlParams = new URLSearchParams(window.location.search);
     const serial = urlParams.get("serial");
     document.getElementById("serialNumber").innerText = serial ?? "未提供";
@@ -62,17 +64,35 @@
 
       const record = verificationDB[serial];
 
+      // 如果已驗證過一次
       if (record.checked >= 1) {
-        resultDiv.innerText = "❌ 驗證次數已達上限，條碼失效";
+        // 再次輸入正確則提示驗證次數已達上限，輸入錯誤則顯示驗證碼錯誤
+        if (inputCode === record.code) {
+          resultDiv.innerText = "❌ 驗證次數已達上限，此商品為正品";
+        } else {
+          resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
+        }
         return;
       }
 
+      // 尚未驗證過，進行第一次驗證
       if (inputCode === record.code) {
-        record.checked++;
-        resultDiv.innerHTML = `✅ 商品驗證成功！<br>剩餘驗證次數：${1 - record.checked} 次`;
+        record.checked = 1;
+        resultDiv.innerHTML = "✅ 商品驗證成功，此商品為正品！";
       } else {
         resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
       }
+    }
+
+    // 重製所有序號的驗證狀態（全域函數）
+    function resetVerification() {
+      const resultDiv = document.getElementById("result");
+      for (const key in verificationDB) {
+        if (verificationDB.hasOwnProperty(key)) {
+          verificationDB[key].checked = 0;
+        }
+      }
+      resultDiv.innerText = "所有序號的驗證狀態已重製";
     }
   </script>
 </body>
