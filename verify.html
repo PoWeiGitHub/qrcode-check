@@ -68,7 +68,7 @@
       if (record.checked >= 1) {
         // 再次輸入正確則提示驗證次數已達上限，輸入錯誤則顯示驗證碼錯誤
         if (inputCode === record.code) {
-          resultDiv.innerText = "❌ 驗證次數已達上限，此商品為正品";
+          resultDiv.innerText = "❌ 此商品已驗證過";
         } else {
           resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
         }
