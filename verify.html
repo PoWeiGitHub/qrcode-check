@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
@@ -85,6 +85,159 @@
     }
 
     // 重製所有序號的驗證狀態（全域函數）
+    function resetVerification() {
+      const resultDiv = document.getElementById("result");
+      for (const key in verificationDB) {
+        if (verificationDB.hasOwnProperty(key)) {
+          verificationDB[key].checked = 0;
+        }
+      }
+      resultDiv.innerText = "所有序號的驗證狀態已重製";
+    }
+  </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>商品防偽驗證 - Excel 資料來源</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 20px;
+    }
+    input, button {
+      font-size: 18px;
+      margin: 10px;
+    }
+    .section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+  </style>
+  <!-- 引入 SheetJS 函式庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+  <h2>商品防偽驗證系統</h2>
+
+  <!-- 防偽驗證區段 -->
+  <div class="section">
+    <h3>防偽驗證</h3>
+    <p>商品序號：<strong id="serialNumber">載入中...</strong></p>
+    <strong style="color: red;">請刮開黑色區塊並檢視驗證碼</strong>
+    <p>請輸入防偽驗證碼（6位英數字）：</p>
+    <input type="text" id="authCode" maxlength="6" />
+    <br>
+    <button id="verifyBtn" onclick="verify()">送出驗證</button>
+    <button onclick="resetVerification()">重製驗證</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <!-- Excel 資料狀態（除錯用） -->
+  <div class="section">
+    <h3>Excel 資料狀態</h3>
+    <div class="result" id="dataStatus">尚未載入 Excel 資料</div>
+  </div>
+
+  <script>
+    // 宣告全域變數
+    let verificationDB = {};  // 完全由 Excel 匯入建立
+    let serial = null;        // 全域商品序號
+
+    // 固定 Excel 檔案 URL，這裡使用 URL 編碼後的檔案名稱
+    const excelURL = "https://poweigithub.github.io/qrcode-check/%E5%8C%AF%E5%85%A5%E6%B8%AC%E8%A9%A6.xlsx";
+
+    // 讀取 Excel 資料並建立 verificationDB
+    async function loadExcelData() {
+      try {
+        console.log("開始讀取 Excel 檔案，URL =", excelURL);
+        const response = await fetch(excelURL);
+        if (!response.ok) {
+          throw new Error("網路回應錯誤：" + response.status);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const data = new Uint8Array(arrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        console.log("Excel 讀取成功，工作表數量 =", workbook.SheetNames.length);
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        // header:1 將工作表轉為陣列，假設第一列為標題
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        console.log("轉換成 JSON 數據 =", jsonData);
+        // 從第二列開始讀取，假設第一欄為序號、第二欄為驗證碼
+        for (let i = 1; i < jsonData.length; i++) {
+          const row = jsonData[i];
+          if (row.length >= 2) {
+            const serialFromExcel = row[0].toString().trim();
+            const codeFromExcel = row[1].toString().trim().toUpperCase();
+            verificationDB[serialFromExcel] = { code: codeFromExcel, checked: 0 };
+          }
+        }
+        document.getElementById("dataStatus").innerText = "Excel 資料已載入：\n" + JSON.stringify(verificationDB, null, 2);
+        console.log("Excel 資料已載入：", verificationDB);
+        // 資料載入成功後啟用驗證按鈕
+        document.getElementById("verifyBtn").disabled = false;
+      } catch (error) {
+        console.error("讀取 Excel 檔案失敗：", error);
+        document.getElementById("dataStatus").innerText = "載入 Excel 資料失敗：" + error;
+        document.getElementById("verifyBtn").disabled = true;
+      }
+    }
+
+    // 等待 DOM 載入完成後執行
+    window.addEventListener("DOMContentLoaded", function() {
+      // 立即載入 Excel 資料
+      loadExcelData();
+      // 從網址查詢參數抓取商品序號 ?serial=xxxx
+      const urlParams = new URLSearchParams(window.location.search);
+      serial = urlParams.get("serial");
+      document.getElementById("serialNumber").innerText = serial ?? "未提供";
+      console.log(serial);
+    });
+
+    // 防偽驗證功能
+    function verify() {
+      const inputCode = document.getElementById("authCode").value.toUpperCase().trim();
+      const resultDiv = document.getElementById("result");
+
+      if (!serial || !verificationDB[serial]) {
+        resultDiv.innerText = "❌ 查無此序號";
+        return;
+      }
+
+      const record = verificationDB[serial];
+
+      // 如果已驗證過一次
+      if (record.checked >= 1) {
+        if (inputCode === record.code) {
+          resultDiv.innerText = "❌ 驗證次數已達上限，此商品為正品";
+        } else {
+          resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
+        }
+        return;
+      }
+
+      // 尚未驗證過，進行第一次驗證
+      if (inputCode === record.code) {
+        record.checked = 1;
+        resultDiv.innerHTML = "✅ 商品驗證成功，此商品為正品！";
+      } else {
+        resultDiv.innerText = "❌ 驗證碼錯誤，請確認後重新輸入";
+      }
+    }
+
+    // 重製所有驗證狀態
     function resetVerification() {
       const resultDiv = document.getElementById("result");
       for (const key in verificationDB) {
